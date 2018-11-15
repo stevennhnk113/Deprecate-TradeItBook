@@ -1,0 +1,33 @@
+{
+	"name": "TradeItBook",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"start": "node node_modules/react-native/local-cli/cli.js start",
+		"test": "jest",
+		"android": "react-native run-android",
+		"ios": "react-native run-ios",
+		"rename": "node ./bin/rename.js",
+		"dev": "start npm run start & npm run connect & start npm run log-a",
+		"copy": "cpx \"../Shared/**/*.tsx\" src/Models/Shared --watch",
+		"build": "tsc",
+		"watch": "tsc --watch",
+		"connect": "adb reverse tcp:8081 tcp:8081",
+		"clean": "cd android && gradlew clean && cd ..",
+		"log-a": "react-native log-android",
+		"log-i": "react-native log-ios"
+	},
+	"dependencies": {
+		"react": "16.6.1",
+		"react-native": "0.57.5"
+	},
+	"devDependencies": {
+		"babel-jest": "23.6.0",
+		"jest": "23.6.0",
+		"metro-react-native-babel-preset": "0.49.1",
+		"react-test-renderer": "16.6.1"
+	},
+	"jest": {
+		"preset": "react-native"
+	}
+}
