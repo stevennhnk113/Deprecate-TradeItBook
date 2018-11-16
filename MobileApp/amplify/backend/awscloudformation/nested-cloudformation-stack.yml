@@ -1,0 +1,206 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Root stack for the Amplify AWS CloudFormation provider",
+	"Parameters": {
+		"DeploymentBucketName": {
+			"Description": "Name of the common deployment bucket provided by the parent stack",
+			"Type": "String",
+			"Default": "DeploymentBucket"
+		},
+		"AuthRoleName": {
+			"Type": "String",
+			"Default": "AuthRoleName"
+		},
+		"UnauthRoleName": {
+			"Type": "String",
+			"Default": "UnauthRoleName"
+		}
+	},
+	"Resources": {
+		"DeploymentBucket": {
+			"Type": "AWS::S3::Bucket",
+			"DeletionPolicy": "Retain",
+			"Properties": {
+				"BucketName": {
+					"Ref": "DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "AuthRoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Allow",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity",
+							"Condition": {
+								"ForAnyValue:StringLike": {
+									"cognito-identity.amazonaws.com:amr": "authenticated"
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"UnauthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "UnauthRoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Allow",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity",
+							"Condition": {
+								"ForAnyValue:StringLike": {
+									"cognito-identity.amazonaws.com:amr": "unauthenticated"
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"authcognito3dc4941b": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/mobileapp-20181115212831-deployment/amplify-cfn-templates/auth/cognito3dc4941b-cloudformation-template.yml",
+				"Parameters": {
+					"identityPoolName": "mobileapp_identitypool_2e1c4d64",
+					"allowUnauthenticatedIdentities": true,
+					"thirdPartyAuth": false,
+					"lambdaLogPolicy": "mobileapp_lambda_log_policy",
+					"openIdLambdaRoleName": "mobileapp_openid_lambda_role",
+					"openIdRolePolicy": "mobileapp_openid_pass_role_policy",
+					"openIdLambdaIAMPolicy": "mobileapp_openid_lambda_iam_policy",
+					"openIdLogPolicy": "mobileapp_openid_lambda_log_policy",
+					"authSelections": "identityPoolOnly",
+					"resourceName": "cognito3dc4941b",
+					"unAuthRoleName": "mobileapp-20181115212831-unauthRole",
+					"authRoleName": "mobileapp-20181115212831-authRole",
+					"unAuthRoleArn": "arn:aws:iam::147881111193:role/mobileapp-20181115212831-unauthRole",
+					"authRoleArn": "arn:aws:iam::147881111193:role/mobileapp-20181115212831-authRole"
+				}
+			}
+		},
+		"analyticsTradeItBookApp": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/mobileapp-20181115212831-deployment/amplify-cfn-templates/analytics/pinpoint-cloudformation-template.json",
+				"Parameters": {
+					"appName": "TradeItBookApp",
+					"roleName": "pinpointLambdaRole60b2d6b2",
+					"cloudWatchPolicyName": "cloudWatchPolicy60b2d6b2",
+					"pinpointPolicyName": "pinpointPolicy60b2d6b2",
+					"authPolicyName": "pinpoint_amplify_60b2d6b2",
+					"unauthPolicyName": "pinpoint_amplify_60b2d6b2",
+					"authRoleName": "mobileapp-20181115212831-authRole",
+					"unauthRoleName": "mobileapp-20181115212831-unauthRole",
+					"IAMPrefix": "147881111193"
+				}
+			}
+		},
+		"apiTradiItBookApp": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/mobileapp-20181115212831-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+				"Parameters": {
+					"AppSyncApiName": "TradiItBookApp",
+					"schemaGraphql": "s3://mobileapp-20181115212831-deployment/amplify-appsync-files/schema.graphql.1542382559913",
+					"ResolverBucket": "mobileapp-20181115212831-deployment",
+					"ResolverRootKey": "amplify-appsync-files",
+					"DeploymentTimestamp": "1542382559913"
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"Region": {
+			"Description": "CloudFormation provider root stack Region",
+			"Value": {
+				"Ref": "AWS::Region"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-Region"
+				}
+			}
+		},
+		"StackName": {
+			"Description": "CloudFormation provider root stack ID",
+			"Value": {
+				"Ref": "AWS::StackName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackName"
+				}
+			}
+		},
+		"StackId": {
+			"Description": "CloudFormation provider root stack name",
+			"Value": {
+				"Ref": "AWS::StackId"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackId"
+				}
+			}
+		},
+		"DeploymentBucketName": {
+			"Description": "CloudFormation provider root stack deployment bucket name",
+			"Value": {
+				"Ref": "DeploymentBucketName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"AuthRole",
+					"Arn"
+				]
+			}
+		},
+		"UnauthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"UnauthRole",
+					"Arn"
+				]
+			}
+		},
+		"AuthRoleName": {
+			"Value": {
+				"Ref": "AuthRole"
+			}
+		},
+		"UnauthRoleName": {
+			"Value": {
+				"Ref": "UnauthRole"
+			}
+		}
+	}
+}
