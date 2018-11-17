@@ -8,10 +8,16 @@
 
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import Amplify, { Auth } from 'aws-amplify';
-import aws_exports from './aws-exports';
 
-Amplify.configure(aws_exports);
+// View
+import SignInView from './Code/View/Authentication/SignInView';
+import { createStackNavigator, createAppContainer } from "react-navigation";
+
+const AppNavigator = createStackNavigator({
+	Home: {
+		screen: SignInView
+	}
+});
 
 type Props = {};
 
