@@ -20,6 +20,7 @@
 	"dependencies": {
 		"aws-amplify": "^1.1.10",
 		"aws-amplify-react-native": "^2.0.8",
+		"native-base": "^2.8.1",
 		"react": "16.6.1",
 		"react-native": "0.57.5",
 		"react-native-elements": "^0.19.1",
