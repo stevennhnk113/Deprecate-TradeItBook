@@ -8,19 +8,26 @@
 
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import Amplify, { Auth } from 'aws-amplify';
-import aws_exports from './aws-exports';
 
-Amplify.configure(aws_exports);
+// View
+import SplashScreen from './Code/View/SplashScreen';
+import SignInView from './Code/View/Authentication/SignInView';
+import { createStackNavigator, createAppContainer } from "react-navigation";
 
-type Props = {};
+const AppNavigator = createStackNavigator
+	({
+		SignInView: { screen: SignInView },
+		SplashScreen: { screen: SplashScreen }
+	},
+	{
+		headerMode: 'none'
+	});
+const AppContainer = createAppContainer(AppNavigator);
 
-export default class App extends Component<Props> {
+export default class App extends Component<any, object> {
 	render() {
 		return (
-			<View>
-				<Text>Helo world</Text>
-			</View>
-		);
+			<AppContainer />
+		)
 	}
 }
