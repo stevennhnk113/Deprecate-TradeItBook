@@ -12,11 +12,21 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 // View
 import SplashScreen from './Code/View/SplashScreen';
 import SignInView from './Code/View/Authentication/SignInView';
+import SignUpView from './Code/View/Authentication/SignUpView';
 import { createStackNavigator, createAppContainer } from "react-navigation";
+
+const AuthenticationNavigator =  createStackNavigator
+	({
+		SignInView: { screen: SignInView },
+		SignUpView: { screen: SignUpView }
+	},
+	{
+		headerMode: 'none'
+	});
 
 const AppNavigator = createStackNavigator
 	({
-		SignInView: { screen: SignInView },
+		Authentication: { screen: AuthenticationNavigator },
 		SplashScreen: { screen: SplashScreen }
 	},
 	{

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { Container, Header, Content, Button, Text, Input, Item } from 'native-base';
+import { Platform, StyleSheet, View, Text, ViewStyle } from 'react-native';
+import { Container, Header, Content, Button, Input, Item, Form, Row, Icon, Col, Grid } from 'native-base';
 import { ThemeColor, FontSize } from '../Styles/Theme';
 
 export default class SignInView extends Component<any, object> {
@@ -8,33 +8,40 @@ export default class SignInView extends Component<any, object> {
 
 	}
 
+	OnSignUp() {
+		this.props.navigation.navigate('SignUpView');
+	}
+
 	render() {
 		return (
-			<View style={styles.container}>
-				<View style={styles.leftRightPad}></View>
-				<View style={styles.formContainer}>
-					<Text style={styles.formLabelLabelStyles}>Email Address</Text>
-					<Item underline>
-						<Input
-							placeholder='Enter your .edu email' />
-					</Item>
-
-					<Text 
-						style={styles.formLabelContainerStyles}>
-							Password
-					</Text>
-					<Item>
-						<Input
-							placeholder='Enter your password here' />
-					</Item>
-
-					<Button
-						style={styles.signInButton}
-						title='SIGN IN'
-						onPress={() => this.OnSignIn()} />
-				</View>
-				<View style={styles.leftRightPad}></View>
-			</View>
+			<Container>
+				<Grid>
+					<Col style={styles.leftRightPad}></Col>
+					<Col style={styles.formContainer}>
+						<Item style={styles.formInputInputStyles as ViewStyle}>
+							<Input placeholder='User Name' />
+							<Icon active type='SimpleLineIcons' name='user' />
+						</Item>
+						<Item style={styles.formInputInputStyles as ViewStyle}>
+							<Input placeholder='Password' />
+							<Icon active type='SimpleLineIcons' name='key' />
+						</Item>
+						<Button 
+							full bordered 
+							style={styles.signInButton as ViewStyle}
+							onPress={() => this.OnSignIn()}>
+							<Text>SIGN IN</Text>
+						</Button>
+						<Button
+							full bordered small
+							style={styles.signUpButton as ViewStyle}
+							onPress={() => this.OnSignUp()}>
+							<Text>SIGN UP</Text>
+						</Button>
+					</Col>
+					<Col style={styles.leftRightPad}></Col>
+				</Grid>
+			</Container>
 		);
 	}
 }
@@ -44,22 +51,30 @@ const styles = StyleSheet.create({
 		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'center',
-		alignItems: 'center',
-		borderColor: ThemeColor.Blue1
+		alignItems: 'center'
+	},
+	temp: {
+		color: ThemeColor.Blue1
 	},
 	formContainer: {
-		flex: 5
+		flex: 3,
+		justifyContent: 'center',
+		alignItems: 'center'
 	},
 	leftRightPad: {
 		flex: 1
 	},
 	signInButton: {
-		backgroundColor: ThemeColor.Blue1,
+		borderColor: ThemeColor.Blue1,
 		marginTop: 10
 	},
+	signUpButton: {
+		borderColor: ThemeColor.Blue1,
+		marginTop: 10,
+		padding: 5
+	},
 	formInputContainerStyles: {
-		borderBottomColor: ThemeColor.Grey2,
-		borderBottomWidth: 2,
+		marginTop: 20
 	},
 	formInputInputStyles: {
 		fontSize: FontSize.H7,

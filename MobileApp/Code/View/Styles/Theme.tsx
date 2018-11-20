@@ -19,6 +19,7 @@ export class ThemeColor {
 	static Grey1: string = '#828282';
 	static Grey2: string = '#BBBBBB';
 	static Grey3: string = '#E6E6E6';
+	static Error: string = '#FF9900';
 }
 
 export class FontSize {
@@ -29,4 +30,6 @@ export class FontSize {
 	static H5: number = 20;
 	static H6: number = 18;
 	static H7: number = 15;
+	static H8: number = 13;
+	static H9: number = 12;
 }
