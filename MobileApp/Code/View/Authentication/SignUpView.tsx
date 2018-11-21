@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, ViewStyle, Text } from 'react-native';
-import { Container, Header, Content, Button, Input, Item, Form, Row, Icon, Col, Grid, View } from 'native-base';
+import { Container, Header, Content, Button, Input, Item, Form, Row, Icon, Col, Grid, View, Toast } from 'native-base';
 import { ThemeColor, FontSize } from '../Styles/Theme';
-import { EmailRegexString } from '../../Helpers';
+import { EmailRegexString, PasswordRegexString } from '../../Helpers';
+
+// Todo: to be moved to AppGlobal
+import UserControllerInstance, { SignUpEnum } from '../../Controller/UserController';
 
 // Aws Amplify
 import { Auth } from 'aws-amplify';
 import { from } from 'zen-observable';
 
-export default class SignInView extends Component<any, any> {
+export default class SignUpView extends Component<any, any> {
 
 	EmailRegex: RegExp;
+	PasswordRegex: RegExp;
 	EmailItem: Item;
 	SignUpButton: Button;
 
@@ -18,40 +22,97 @@ export default class SignInView extends Component<any, any> {
 		super(props);
 
 		this.EmailRegex = new RegExp(EmailRegexString, 'i');
+		this.PasswordRegex = new RegExp(PasswordRegexString);
+
 		this.EmailItem = null;
 	}
 
 	componentWillMount() {
 		this.setState(() => ({
-			Email: '',
+			Email: 'nguyenh57@student.douglascollege.ca',
 			IsEmailError: false,
-			Password: '',
-			ConfirmPassword: '',
-			IsPasswordMatch: true
+			Password: 'testPD123!',
+			ConfirmPassword: 'testPD123!',
+			IsPasswordError: false
 		}));
 	}
 
-	OnSignUp() {
-		if (this.state.Email.length == '') {
-			console.log('required');
-			this.setState({ IsEmailError: true, EmailErrorMessage: 'Required' });
-			return;
-		}
+	async OnSignUp() {
+		let emailErrorMessage: string;
+		let isEmailError: boolean = false;
+		let passwordErrorMessage: string;
+		let isPasswordError: boolean = false;
 
-		if (!this.EmailRegex.test(this.state.Email)) {
+		if (this.state.Email.length == '')
+		{
+			console.log('email required');
+			emailErrorMessage = 'Required';
+			isEmailError = true;
+		} 
+		else if (!this.EmailRegex.test(this.state.Email))
+		{
 			console.log('Invalid email');
-			console.log(this.state.Email);
-			this.setState({IsEmailError: true, EmailErrorMessage: 'Invalid Email'});
-			return;
-		}
-
-		if (!this.state.Email.includes('@student.douglascollege.ca')) {
+			emailErrorMessage = 'Invalid Email';
+			isEmailError = true;
+		} 
+		else if (!this.state.Email.includes('@student.douglascollege.ca')) 
+		{
 			console.log('Not douglas email');
-			this.setState({ IsEmailError: true, EmailErrorMessage: 'Invalid Douglas College email' });
-			return;
+			emailErrorMessage = 'Invalid Douglas College email';
+			isEmailError = true;
 		}
 
-		this.setState({ IsEmailError: false });
+		if (this.state.Password.length == '') {
+			console.log('password required');
+			passwordErrorMessage = 'Required';
+			isPasswordError = true;
+		}
+		// Todo: get password regex to work
+		// else if(!this.PasswordRegex.test('helloworld123!'))
+		// {
+		// 	console.log(this.PasswordRegex.test(this.state.Password.trim()));
+		// 	console.log(this.PasswordRegex.source);
+		// 	console.log(this.PasswordRegex.exec(this.state.Password));
+		// 	console.log('Password invalid');
+		// 	console.log(this.state.Password);
+		// 	passwordErrorMessage = 'Invalid';
+		// 	isPasswordError = true;
+		// }
+		else if(this.state.Password != this.state.ConfirmPassword)
+		{
+			console.log('password not match');
+			passwordErrorMessage = 'Password not match';
+			isPasswordError = true;
+		}
+
+		if(!isEmailError && !isPasswordError) {
+			let signUpResult = await UserControllerInstance.SignUpUser(this.state.Email, this.state.Password);
+			
+			switch(signUpResult){
+				case SignUpEnum.Success:
+					this.props.navigation.navigate('ConfirmSignUpView');
+					break;
+				case SignUpEnum.UsernameExistsException:
+					emailErrorMessage = "Email exist";
+					isEmailError = true;
+					break;
+				default:
+					Toast.show({
+						text: "Encounter Problem!",
+						duration: 2000
+					})
+					break;
+			}
+
+			console.log(signUpResult);
+		}
+
+		this.setState({
+			IsEmailError: isEmailError,
+			EmailErrorMessage: emailErrorMessage,
+			IsPasswordError: isPasswordError,
+			PasswordErrorMessage: passwordErrorMessage
+		});
 	}
 
 	GetEmailErrorMessage() {
@@ -65,10 +126,24 @@ export default class SignInView extends Component<any, any> {
 	}
 
 	GetPasswordErrorMessage() {
-		if (!this.state.IsPasswordMatch) {
-			return (
-				<Text style={styles.ErrorText}>Password not match</Text>
-			);
+		if (this.state.IsPasswordError) {
+			if(this.state.PasswordErrorMessage == 'Invalid')
+			{
+				return (
+					<View style={styles.passwordErrorText}>
+						<Text style={styles.ErrorText}>At least 8 characters</Text>
+						<Text style={styles.ErrorText}>At least 1 number</Text>
+						<Text style={styles.ErrorText}>At least 1 letter</Text>
+						<Text style={styles.ErrorText}>At least 1 special characters</Text>
+					</View>
+				);
+			}
+			else
+			{
+				return (
+					<Text style={styles.ErrorText}>{this.state.PasswordErrorMessage}</Text>
+				);
+			}
 		} else {
 			return null;
 		}
@@ -83,22 +158,22 @@ export default class SignInView extends Component<any, any> {
 						<Item
 							ref={(obj) => this.EmailItem = obj}
 							style={styles.formInputInputStyles as ViewStyle}>
-							<Input 
+							<Input
 								placeholder='User Name'
-								onChangeText={(text) => this.setState({Email: text})}/>
+								onChangeText={(text) => this.setState({ Email: text })} />
 						</Item>
 						{this.GetEmailErrorMessage()}
 						<Item style={styles.formInputInputStyles as ViewStyle}>
 							<Input
 								placeholder='Password'
 								secureTextEntry
-								onChangeText={(text) => this.setState({ Password: text })}/>
+								onChangeText={(text) => this.setState({ Password: text })} />
 						</Item>
 						<Item style={styles.formInputInputStyles as ViewStyle}>
 							<Input
 								placeholder='Confirm Password'
 								secureTextEntry
-								onChangeText={(text) => this.setState({ ConfirmPassword: text })}/>
+								onChangeText={(text) => this.setState({ ConfirmPassword: text })} />
 						</Item>
 						{this.GetPasswordErrorMessage()}
 						<Button
@@ -129,10 +204,10 @@ const styles = StyleSheet.create({
 	formContainer: {
 		flex: 3,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
 	},
 	leftRightPad: {
-		flex: 1
+		height: 1
 	},
 	signInButton: {
 		borderColor: ThemeColor.Blue1,
@@ -153,6 +228,9 @@ const styles = StyleSheet.create({
 	ErrorText: {
 		fontSize: FontSize.H9,
 		color: ThemeColor.Error,
+		alignSelf: 'flex-end'
+	},
+	passwordErrorText: {
 		alignSelf: 'flex-end'
 	}
 });
